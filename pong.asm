@@ -1,8 +1,7 @@
-STACK SEGMENT PARA STACK
-	DB 64 DUP (' ')
-STACK ENDS
-
-DATA SEGMENT PARA 'DATA'
+.model small
+.386
+.stack 64
+.data
 	
 	WINDOW_WIDTH DW 140h                 ;el ancho de la ventana (320 pixels)
 	WINDOW_HEIGHT DW 0C8h                ;el alto de la ventana (200 pixels)
@@ -45,16 +44,15 @@ DATA SEGMENT PARA 'DATA'
 	PADDLE_HEIGHT DW 25h                 ;alto de la raqueta predeterminado
 	PADDLE_VELOCITY DW 0Fh               ;velocidad de la raqueta predeterminada
 
-DATA ENDS
 
-CODE SEGMENT PARA 'CODE'
+.code
 
 	MAIN PROC FAR
-	ASSUME CS:CODE,DS:DATA,SS:STACK      ;asocia data, code y stack a sus registros ds,cs y ss, respectivamente
+	;ASSUME CS:CODE,DS:DATA,SS:STACK      ;asocia data, code y stack a sus registros ds,cs y ss, respectivamente
 	PUSH DS                              ;Le hace push al ds en la pila
 	SUB AX,AX                            ;limpia el registro AX
 	PUSH AX                              ;le hace push al AX en la pila
-	MOV AX,DATA                          ;guarda en el AX la data
+	MOV AX,@data                         ;guarda en el AX la data
 	MOV DS,AX                            ;guarda ds lo que esta en AX
 	POP AX                               ;se le hace pop a la pila para guardarlo en AX
 	POP AX                               ;se le hace pop a la pila para guardarlo en AX
@@ -701,5 +699,5 @@ CODE SEGMENT PARA 'CODE'
 
 	CONCLUDE_EXIT_GAME ENDP
 
-CODE ENDS
+
 END
