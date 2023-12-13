@@ -79,10 +79,11 @@
 			
 			CALL MOVE_BALL               ;mover la bola
 			CALL DRAW_BALL               ;dibujar la bola
-			
+
 			CALL MOVE_PADDLES            ;mover las raquetas (comprobar si se presionan teclas)
 			CALL DRAW_PADDLES            ;dibujar las dos raquetas con las posiciones actualizadas
 			
+		
 			CALL DRAW_UI                 ;dibuja la interfaz de usuario
 			
 			JMP CHECK_TIME               ;Despues de todo comprobar el tiempo de nuevo
@@ -286,11 +287,11 @@
 			MOV AX,WINDOW_BOUNDS
 			CMP PADDLE_LEFT_Y,AX
 			JL FIX_PADDLE_LEFT_TOP_POSITION
-			JMP CHECK_RIGHT_PADDLE_MOVEMENT
+			JMP EXIT_PADDLE_MOVEMENT
 			
 			FIX_PADDLE_LEFT_TOP_POSITION:
 				MOV PADDLE_LEFT_Y,AX
-				JMP CHECK_RIGHT_PADDLE_MOVEMENT
+				JMP EXIT_PADDLE_MOVEMENT
 			
 		MOVE_LEFT_PADDLE_DOWN:
 			MOV AX,PADDLE_VELOCITY
@@ -300,11 +301,11 @@
 			SUB AX,PADDLE_HEIGHT
 			CMP PADDLE_LEFT_Y,AX
 			JG FIX_PADDLE_LEFT_BOTTOM_POSITION
-			JMP CHECK_RIGHT_PADDLE_MOVEMENT
+			JMP EXIT_PADDLE_MOVEMENT
 			
 			FIX_PADDLE_LEFT_BOTTOM_POSITION:
 				MOV PADDLE_LEFT_Y,AX
-				JMP CHECK_RIGHT_PADDLE_MOVEMENT
+				JMP EXIT_PADDLE_MOVEMENT
 		
 		
 ;       Movimiento de la raqueta derecha
@@ -472,7 +473,7 @@
 		MOV AH,02h                       ;Posiciona el curso
 		MOV BH,00h                       ;posiciona el numero de pagina
 		MOV DH,04h                       ;seleccionar fila
-		MOV DL,1Fh						 ;seleccionar columna
+		MOV DL,1Fh			 ;seleccionar columna
 		INT 10h							 
 		
 		MOV AH,09h                       ;Escribir el string con la salida estandar
@@ -513,7 +514,16 @@
 	
 	DRAW_GAME_OVER_MENU PROC NEAR        ;Dibuja el menu de game over
 		
-		CALL CLEAR_SCREEN                ;limpia la pantalla
+		MOV AH,00h                   ;colocar la configuracion en modo video
+		MOV AL,13h                   ;elegir el modo de video
+		INT 10h   		     ;ejecutar la configuracion
+			
+		MOV AX, 0A000h      ; Segmento de memoria de video en modo gráfico 13h
+		MOV ES, AX
+		XOR DI, DI          ; Puntero al comienzo de la memoria de video
+		MOV CX, 320 * 200   ; Número total de píxeles en modo 320x200
+		MOV AL, 2           ; Color para el fondo verde
+		REP STOSB           ; Rellenar toda la pantalla con el color seleccionado
 
 ;       Muestra el menu 
 ;		MOV AH,02h                       ;pone el cursor en posicion
@@ -592,7 +602,16 @@
 	
 	DRAW_MAIN_MENU PROC NEAR
 		
-		CALL CLEAR_SCREEN    
+		MOV AH,00h                   ;colocar la configuracion en modo video
+		MOV AL,13h                   ;elegir el modo de video
+		INT 10h   		     ;ejecutar la configuracion
+			
+		MOV AX, 0A000h      ; Segmento de memoria de video en modo gráfico 13h
+		MOV ES, AX
+		XOR DI, DI          ; Puntero al comienzo de la memoria de video
+		MOV CX, 320 * 200   ; Número total de píxeles en modo 320x200
+		MOV AL, 2           ; Color para el fondo verde
+		REP STOSB           ; Rellenar toda la pantalla con el color seleccionado   
 
 ;       muestra el menu
 		MOV AH,02h                       ;pone el cursor en posicion
@@ -676,21 +695,19 @@
 		RET
 	UPDATE_WINNER_TEXT ENDP
 	
-	CLEAR_SCREEN PROC NEAR    
-    
-    		MOV AH,00h                   ;colocar la configuracion en modo video
-		MOV AL,13h                   ;elegir el modo de video
-		INT 10h   		     ;ejecutar la configuracion
-			
-		MOV AX, 0A000h      ; Segmento de memoria de video en modo gráfico 13h
-		MOV ES, AX
-		XOR DI, DI          ; Puntero al comienzo de la memoria de video
-		MOV CX, 320 * 200   ; Número total de píxeles en modo 320x200
-		MOV AL, 2           ; Color para el fondo verde
-		REP STOSB           ; Rellenar toda la pantalla con el color seleccionado 
-
-	RET
+	CLEAR_SCREEN PROC NEAR               ;limpia la pantalla reiniciando el modo de video
+	
+			MOV AH,00h                   ;colocar la configuracion en modo video
+			MOV AL,13h                   ;elegir el modo de video
+			INT 10h    					 ;ejecutar la configuracion
 		
+			;MOV AH,0Bh 					 ;ajustar la configuracion
+			;MOV BH,00h 					 ;Al fondo
+			;MOV BL,00h 					 ;seleccionar el color negro
+			;INT 10h    					 ;ejecutar la configuracion
+			
+			RET
+			
 	CLEAR_SCREEN ENDP
 	
 	CONCLUDE_EXIT_GAME PROC NEAR         ;Vuelve al modo de texto
