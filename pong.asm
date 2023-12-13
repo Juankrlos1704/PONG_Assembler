@@ -48,10 +48,9 @@
 .code
 
 	MAIN PROC FAR
-	
+
 	MOV AX,@data                         ;guarda en el AX la data
 	MOV DS,AX                            ;guarda ds lo que esta en AX
-	
 		
 		CALL CLEAR_SCREEN                ;pone las configuraciones iniciales del modo video
 		
@@ -316,13 +315,14 @@
 			JE MOVE_RIGHT_PADDLE_UP
 			CMP AL,4Fh ;'O'
 			JE MOVE_RIGHT_PADDLE_UP
-			CMP AL,1Bh; Esc
-			JE  CONCLUDE_EXIT_GAME
+			
 			;si es 'l' or 'L' mover abajo
 			CMP AL,6Ch ;'l'
 			JE MOVE_RIGHT_PADDLE_DOWN
 			CMP AL,4Ch ;'L'
 			JE MOVE_RIGHT_PADDLE_DOWN
+			CMP AL,1Bh; Esc
+			JE  CONCLUDE_EXIT_GAME
 			JMP EXIT_PADDLE_MOVEMENT
 			
 
@@ -408,7 +408,7 @@
 		
 		DRAW_PADDLE_LEFT_HORIZONTAL:
 			MOV AH,0Ch 					 ;ajusta la configuracion para escribir un pixel
-			MOV AL,02h 					 ;se escoge el color verde
+			MOV AL,09h 					 ;se escoge el color azul
 			MOV BH,00h 					 ;se elige el numero de pagina
 			INT 10h    					 ;ejecuta la configuracion anterior
 			
@@ -451,7 +451,7 @@
 			JNG DRAW_PADDLE_RIGHT_HORIZONTAL
 			
 		RET
-        DRAW_PADDLES ENDP
+	DRAW_PADDLES ENDP
 	
 	DRAW_UI PROC NEAR
 		
@@ -592,8 +592,8 @@
 	
 	DRAW_MAIN_MENU PROC NEAR
 		
-		CALL CLEAR_SCREEN
-		
+		CALL CLEAR_SCREEN    
+
 ;       muestra el menu
 		MOV AH,02h                       ;pone el cursor en posicion
 		MOV BH,00h                       ;selecciona el numero de pagina
@@ -676,28 +676,28 @@
 		RET
 	UPDATE_WINNER_TEXT ENDP
 	
-	CLEAR_SCREEN PROC NEAR               ;limpia la pantalla reiniciando el modo de video
+	CLEAR_SCREEN PROC NEAR    
+    
+    		MOV AH,00h                   ;colocar la configuracion en modo video
+		MOV AL,13h                   ;elegir el modo de video
+		INT 10h   		     ;ejecutar la configuracion
 			
-			MOV AH,00h                   ;colocar la configuracion en modo video
-			MOV AL,13h                   ;elegir el modo de video
-			INT 10h    					 ;ejecutar la configuracion
+		MOV AX, 0A000h      ; Segmento de memoria de video en modo gráfico 13h
+		MOV ES, AX
+		XOR DI, DI          ; Puntero al comienzo de la memoria de video
+		MOV CX, 320 * 200   ; Número total de píxeles en modo 320x200
+		MOV AL, 2           ; Color para el fondo verde
+		REP STOSB           ; Rellenar toda la pantalla con el color seleccionado 
 
-
-			MOV AX, 0A000h      ; Segmento de memoria de video en modo gráfico 13h
-			MOV ES, AX
-			XOR DI, DI          ; Puntero al comienzo de la memoria de video
-			MOV CX, 320 * 200   ; Número total de píxeles en modo 320x200
-			MOV AL, 9           ; Color para el fondo 
-			REP STOSB           ; Rellenar toda la pantalla con el color seleccionado
-			RET
-			
+	RET
+		
 	CLEAR_SCREEN ENDP
 	
 	CONCLUDE_EXIT_GAME PROC NEAR         ;Vuelve al modo de texto
 		
 		MOV AH,00h                   ;colocar la configuracion en modo video
 		MOV AL,02h                   ;elegir el modo de video
-		INT 10h    					 ;ejecutar la configuracion
+		INT 10h    		     ;ejecutar la configuracion
 		
 		MOV AH,4Ch                   ;terminar el programa
 		INT 21h
